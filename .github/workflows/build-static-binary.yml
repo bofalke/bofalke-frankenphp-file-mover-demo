@@ -1,0 +1,33 @@
+name: CI
+on:
+    push:
+        branches: [ main ]
+jobs:
+    build-static-binary:
+        defaults:
+          run:
+            working-directory: ./github-actions-docker
+        runs-on: ubuntu-latest
+        container: dunglas/frankenphp:static-builder-1.2.5
+        steps:
+            - name: Check out repository code
+              uses: actions/checkout@v4
+            - name: Install dependencies
+              run: composer install --ignore-platform-reqs --no-dev -a
+              working-directory: ${{github.workspace}}
+            - run: echo APP_ENV=prod > .env.local
+              working-directory: ${{github.workspace}}
+            - run: echo APP_DEBUG=0 >> .env.local
+              working-directory: ${{github.workspace}}
+            - run: rm -Rf tests/
+              working-directory: ${{github.workspace}}
+            - run: composer dump-env prod
+              working-directory: ${{github.workspace}}
+            - run: mkdir -p /go/src/app/dist/app
+              working-directory: ${{github.workspace}}
+            - run: cp -r ./. /go/src/app/dist/app/
+              working-directory: ${{github.workspace}}
+            - run: EMBED=/go/src/app/dist/app PHP_EXTENSIONS=ctype,iconv,pdo_sqlite /go/src/app/build-static.sh
+              working-directory: /go/src/app
+            - run: ls -al /go/src/app/dist/
+              working-directory: /go/src/app
