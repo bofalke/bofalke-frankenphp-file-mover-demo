@@ -15,13 +15,13 @@ You should be able to execute the following commands to see the binary in action
 
 ```shell
 # Spin up Mailcatcher
-$ docker compose up database mailer -d
+$ docker compose up mailer -d
 # Create files with modified timestamp
 $ touch -d "-5 minutes" tests/fixtures/source/new_file
 $ touch -d "-3600 minutes" tests/fixtures/source/stale_file
 # demo binary is called file-mover
 # Send notification for stale_file
-$ ./file-mover php-cli bin/console app:notify-stale-files source 60
+$ ./file-mover php-cli bin/console app:notify-stale-files tests/fixtures/source 60
 # Move stale_file to destination folder
 $ ./file-mover php-cli bin/console app:move-files tests/fixtures/source tests/fixtures/destination 60
 # Start up the Web App:
