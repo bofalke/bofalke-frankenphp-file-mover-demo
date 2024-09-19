@@ -1,51 +1,35 @@
-# Symfony Docker
+## FrankenPHP Demo: File mover
 
-A [Docker](https://www.docker.com/)-based installer and runtime for the [Symfony](https://symfony.com) web framework,
-with [FrankenPHP](https://frankenphp.dev) and [Caddy](https://caddyserver.com/) inside!
+This is a demo application using FrankenPHP for moving stale files and sending notifications.
+Check out the [build-static-binary.yml](.github/workflows/build-static-binary.yml) to see how to
+generate a new binary for each new tag in the git repository.
 
-![CI](https://github.com/dunglas/symfony-docker/workflows/CI/badge.svg)
+Refer to the official [FrankenPHP Documentation](https://frankenphp.dev/docs/) for more information.
 
-## Getting Started
+Additionally, I wrote a blog post about [releasing PHP Apps as Binaries](https://blog.bitexpert.de/blog/frankenphp-gitlab-ci).
 
-1. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/) (v2.10+)
-2. Run `docker compose build --no-cache` to build fresh images
-3. Run `docker compose up --pull always -d --wait` to set up and start a fresh Symfony project
-4. Open `https://localhost` in your favorite web browser and [accept the auto-generated TLS certificate](https://stackoverflow.com/a/15076602/1352334)
-5. Run `docker compose down --remove-orphans` to stop the Docker containers.
+## Demo usage of binary
 
-## Features
+After downloading the binary from the latest release, put it into the project root. 
+You should be able to execute the following commands to see the binary in action
 
-* Production, development and CI ready
-* Just 1 service by default
-* Blazing-fast performance thanks to [the worker mode of FrankenPHP](https://github.com/dunglas/frankenphp/blob/main/docs/worker.md) (automatically enabled in prod mode)
-* [Installation of extra Docker Compose services](docs/extra-services.md) with Symfony Flex
-* Automatic HTTPS (in dev and prod)
-* HTTP/3 and [Early Hints](https://symfony.com/blog/new-in-symfony-6-3-early-hints) support
-* Real-time messaging thanks to a built-in [Mercure hub](https://symfony.com/doc/current/mercure.html)
-* [Vulcain](https://vulcain.rocks) support
-* Native [XDebug](docs/xdebug.md) integration
-* Super-readable configuration
+```shell
+# Spin up Mailcatcher
+$ docker compose up database mailer -d
+# Create files with modified timestamp
+$ touch -d "-5 minutes" tests/fixtures/source/new_file
+$ touch -d "-3600 minutes" tests/fixtures/source/stale_file
+# demo binary is called file-mover
+# Send notification for stale_file
+$ ./file-mover php-cli bin/console app:notify-stale-files source 60
+# Move stale_file to destination folder
+$ ./file-mover php-cli bin/console app:move-files tests/fixtures/source tests/fixtures/destination 60
+# Start up the Web App:
+$ sudo ./file-mover php-server --domain=localhost
+```
 
-**Enjoy!**
+Mailer:
+http://localhost:8025/
 
-## Docs
-
-1. [Options available](docs/options.md)
-2. [Using Symfony Docker with an existing project](docs/existing-project.md)
-3. [Support for extra services](docs/extra-services.md)
-4. [Deploying in production](docs/production.md)
-5. [Debugging with Xdebug](docs/xdebug.md)
-6. [TLS Certificates](docs/tls.md)
-7. [Using MySQL instead of PostgreSQL](docs/mysql.md)
-8. [Using Alpine Linux instead of Debian](docs/alpine.md)
-9. [Using a Makefile](docs/makefile.md)
-10. [Updating the template](docs/updating.md)
-11. [Troubleshooting](docs/troubleshooting.md)
-
-## License
-
-Symfony Docker is available under the MIT License.
-
-## Credits
-
-Created by [Kévin Dunglas](https://dunglas.dev), co-maintained by [Maxime Helias](https://twitter.com/maxhelias) and sponsored by [Les-Tilleuls.coop](https://les-tilleuls.coop).
+Web App:
+http://localhost
