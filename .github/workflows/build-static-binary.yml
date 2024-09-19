@@ -1,4 +1,4 @@
-name: CI
+name: Build
 on:
   push:
     tags:
@@ -19,6 +19,8 @@ jobs:
             - run: echo APP_ENV=prod > .env.local
               working-directory: ${{github.workspace}}
             - run: echo APP_DEBUG=0 >> .env.local
+              working-directory: ${{github.workspace}}
+            - run: echo MAILER_DSN=${{secrets.MAILER_DSN}} >> .env.local
               working-directory: ${{github.workspace}}
             - run: rm -Rf tests/
               working-directory: ${{github.workspace}}
